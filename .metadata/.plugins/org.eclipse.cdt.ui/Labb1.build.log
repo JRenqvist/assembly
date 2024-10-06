@@ -1,0 +1,8 @@
+
+**** Build of configuration Debug for project Labb1 ****
+
+/sw/ti/ccs/12.5.0/ccs/utils/bin/gmake -k -j 20 all -O 
+ 
+gmake[1]: 'Labb1.out' is up to date.
+
+**** Build Finished ****

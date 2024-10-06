@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;Labb2b/labb2.asm&apos; to &apos;labb2b.asm&apos;" description="Rename resource &apos;labb2.asm&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="labb2.asm" name="labb2b.asm" stamp="1708613311790" updateReferences="true"/>
+</session>

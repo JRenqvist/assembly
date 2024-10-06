@@ -1,0 +1,300 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 
+;; Mall för lab1 i TSEA28 Datorteknik Y
+;;
+;; 210105 KPa: Modified for distance version
+;;
+
+	;; Ange att koden är för thumb mode
+	.thumb
+	.text
+	.align 2
+
+	;; Ange att labbkoden startar här efter initiering
+	.global	main
+	
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Ange vem som skrivit koden
+;;               student LiU-ID: _________________
+;; + ev samarbetspartner LiU-ID:____________
+;;
+;; Placera programmet här
+
+main:				; Start av programmet
+	b main
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Inargument: Pekare till strängen i r4
+; Längd på strängen i r5
+; Utargument: Inga
+;
+; Funktion: Skriver ut strängen mha subrutinen printchar
+printstring:
+	; Loopa igenom hela strängen
+	loop:
+		ldrb r0, [r4], #1	; Läs en byte från minne r4 och öka pekaren med 1
+		bl printchar		; Kalla på printchar som skriver ut bokstaven i r0
+		subs r5, r5, #1		; Subtrahera 1 från r5 och sätter Z flaggan
+		beq stop			; Kollar på Z flaggan: resultatet på subtraktionen är 0 hoppar programmet till stop
+		b loop				; Branch tillbaka till loopens början och gör om proceduren
+
+	stop:
+		bx lr
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Inargument: Inga
+; Utargument: Inga
+;
+; Funktion: Tänder grön lysdiod (bit 3 = 1, bit 2 = 0, bit 1 = 0)
+deactivatealarm:
+	ldr r1, =0x4002507C		; Ladda in GPOIF_GPOIFDATA-adressen till r1
+	ldr r2, [r1]			; Ladda in värdet (r1 är en pekare till GPIOF_GPOIFDATA-värdet) från r1 till r2
+	orr r2, r2, #0x08		; Se till att bit 3 i r2 är 1 (xxxx xxxx | xxxx 1xxx = xxxx 1xxx) och lagra det i r2
+	and r2, r2, #0x08		; Se till att alla andra värden i r2 är 0 (xxxx 1xxx & 0000 1000 = 0000 1000)
+	str r2, [r1]			; Lägg värdet i r2 i adressen till r1
+
+	bx lr
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Inargument: Inga
+; Utargument: Inga
+;
+; Funktion: Tänder röd lysdiod (bit 3 = 0, bit 2 = 0, bit 1 = 1)
+activatealarm:
+	ldr r1, =0x4002507C		; Ladda in GPOIF_GPOIFDATA-adressen till r1
+	ldr r2, [r1]			; Ladda in värdet (r1 är en pekare till GPOIF_GPOIFDATA-värdet) från r1 till r2
+	orr r2, r2, #0x02		; Samma princip som deactivatealarm, fast med bit 3 = 0 och bit 1 = 1
+	and r2, r2, #0x02
+	str r2, [r1]
+
+	bx lr
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,
+;;;
+;;; Allt här efter ska inte ändras
+;;;
+;;; Rutiner för initiering
+;;; Se labmanual för vilka namn som ska användas
+;;;
+	
+	.align 4
+
+;; 	Initiering av seriekommunikation
+;;	Förstör r0, r1 
+	
+inituart:
+	mov r1,#(RCGCUART & 0xffff)		; Koppla in serieport
+	movt r1,#(RCGCUART >> 16)
+	mov r0,#0x01
+	str r0,[r1]
+
+	mov r1,#(RCGCGPIO & 0xffff)
+	movt r1,#(RCGCGPIO >> 16)
+	ldr r0,[r1]
+	orr r0,r0,#0x01
+	str r0,[r1]		; Koppla in GPIO port A
+
+	nop			; vänta lite
+	nop
+	nop
+
+	mov r1,#(GPIOA_GPIOAFSEL & 0xffff)
+	movt r1,#(GPIOA_GPIOAFSEL >> 16)
+	mov r0,#0x03
+	str r0,[r1]		; pinnar PA0 och PA1 som serieport
+
+	mov r1,#(GPIOA_GPIODEN & 0xffff)
+	movt r1,#(GPIOA_GPIODEN >> 16)
+	mov r0,#0x03
+	str r0,[r1]		; Digital I/O på PA0 och PA1
+
+	mov r1,#(UART0_UARTIBRD & 0xffff)
+	movt r1,#(UART0_UARTIBRD >> 16)
+	mov r0,#0x08
+	str r0,[r1]		; Sätt hastighet till 115200 baud
+	mov r1,#(UART0_UARTFBRD & 0xffff)
+	movt r1,#(UART0_UARTFBRD >> 16)
+	mov r0,#44
+	str r0,[r1]		; Andra värdet för att få 115200 baud
+
+	mov r1,#(UART0_UARTLCRH & 0xffff)
+	movt r1,#(UART0_UARTLCRH >> 16)
+	mov r0,#0x60
+	str r0,[r1]		; 8 bit, 1 stop bit, ingen paritet, ingen FIFO
+	
+	mov r1,#(UART0_UARTCTL & 0xffff)
+	movt r1,#(UART0_UARTCTL >> 16)
+	mov r0,#0x0301
+	str r0,[r1]		; Börja använda serieport
+
+	bx  lr
+
+; Definitioner för registeradresser (32-bitars konstanter) 
+GPIOHBCTL	.equ	0x400FE06C
+RCGCUART	.equ	0x400FE618
+RCGCGPIO	.equ	0x400fe608
+UART0_UARTIBRD	.equ	0x4000c024
+UART0_UARTFBRD	.equ	0x4000c028
+UART0_UARTLCRH	.equ	0x4000c02c
+UART0_UARTCTL	.equ	0x4000c030
+UART0_UARTFR	.equ	0x4000c018
+UART0_UARTDR	.equ	0x4000c000
+GPIOA_GPIOAFSEL	.equ	0x40004420
+GPIOA_GPIODEN	.equ	0x4000451c
+GPIOE_GPIODATA	.equ	0x400240fc
+GPIOE_GPIODIR	.equ	0x40024400
+GPIOE_GPIOAFSEL	.equ	0x40024420
+GPIOE_GPIOPUR	.equ	0x40024510
+GPIOE_GPIODEN	.equ	0x4002451c
+GPIOE_GPIOAMSEL	.equ	0x40024528
+GPIOE_GPIOPCTL	.equ	0x4002452c
+GPIOF_GPIODATA	.equ	0x4002507c
+GPIOF_GPIODIR	.equ	0x40025400
+GPIOF_GPIOAFSEL	.equ	0x40025420
+GPIOF_GPIODEN	.equ	0x4002551c
+GPIOF_GPIOLOCK	.equ	0x40025520
+GPIOKEY		.equ	0x4c4f434b
+GPIOF_GPIOPUR	.equ	0x40025510
+GPIOF_GPIOCR	.equ	0x40025524
+GPIOF_GPIOAMSEL	.equ	0x40025528
+GPIOF_GPIOPCTL	.equ	0x4002552c
+
+;; Initiering av port F
+;; Förstör r0, r1, r2
+initGPIOF:
+	mov r1,#(RCGCGPIO & 0xffff)
+	movt r1,#(RCGCGPIO >> 16)
+	ldr r0,[r1]
+	orr r0,r0,#0x20		; Koppla in GPIO port F
+	str r0,[r1]
+	nop 			; Vänta lite
+	nop
+	nop
+
+	mov r1,#(GPIOHBCTL & 0xffff)	; Använd apb för GPIO
+	movt r1,#(GPIOHBCTL >> 16)
+	ldr r0,[r1]
+	mvn r2,#0x2f		; bit 5-0 = 0, övriga = 1
+	and r0,r0,r2
+	str r0,[r1]
+
+	mov r1,#(GPIOF_GPIOLOCK & 0xffff)
+	movt r1,#(GPIOF_GPIOLOCK >> 16)
+	mov r0,#(GPIOKEY & 0xffff)
+	movt r0,#(GPIOKEY >> 16)
+	str r0,[r1]		; Lås upp port F konfigurationsregister
+
+	mov r1,#(GPIOF_GPIOCR & 0xffff)
+	movt r1,#(GPIOF_GPIOCR >> 16)
+	mov r0,#0x1f		; tillåt konfigurering av alla bitar i porten
+	str r0,[r1]
+
+	mov r1,#(GPIOF_GPIOAMSEL & 0xffff)
+	movt r1,#(GPIOF_GPIOAMSEL >> 16)
+	mov r0,#0x00		; Koppla bort analog funktion
+	str r0,[r1]
+
+	mov r1,#(GPIOF_GPIOPCTL & 0xffff)
+	movt r1,#(GPIOF_GPIOPCTL >> 16)
+	mov r0,#0x00		; använd port F som GPIO
+	str r0,[r1]
+
+	mov r1,#(GPIOF_GPIODIR & 0xffff)
+	movt r1,#(GPIOF_GPIODIR >> 16)
+	mov r0,#0x0e		; styr LED (3 bits), andra bitar är ingångar
+	str r0,[r1]
+
+	mov r1,#(GPIOF_GPIOAFSEL & 0xffff)
+	movt r1,#(GPIOF_GPIOAFSEL >> 16)
+	mov r0,#0		; alla portens bitar är GPIO
+	str r0,[r1]
+
+	mov r1,#(GPIOF_GPIOPUR & 0xffff)
+	movt r1,#(GPIOF_GPIOPUR >> 16)
+	mov r0,#0x11		; svag pull-up för tryckknapparna
+	str r0,[r1]
+
+	mov r1,#(GPIOF_GPIODEN & 0xffff)
+	movt r1,#(GPIOF_GPIODEN >> 16)
+	mov r0,#0xff		; alla pinnar som digital I/O
+	str r0,[r1]
+
+	bx lr
+
+
+;; Initiering av port E
+;; Förstör r0, r1
+initGPIOE:
+	mov r1,#(RCGCGPIO & 0xffff)    ; Clock gating port (slå på I/O-enheter)
+	movt r1,#(RCGCGPIO >> 16)
+	ldr r0,[r1]
+	orr r0,r0,#0x10		; koppla in GPIO port B
+	str r0,[r1]
+	nop			; vänta lite
+	nop
+	nop
+
+	mov r1,#(GPIOE_GPIODIR & 0xffff)
+	movt r1,#(GPIOE_GPIODIR >> 16)
+	mov r0,#0x0		; alla bitar är ingångar
+	str r0,[r1]
+
+	mov r1,#(GPIOE_GPIOAFSEL & 0xffff)
+	movt r1,#(GPIOE_GPIOAFSEL >> 16)
+	mov r0,#0		; alla portens bitar är GPIO
+	str r0,[r1]
+
+	mov r1,#(GPIOE_GPIOAMSEL & 0xffff)
+	movt r1,#(GPIOE_GPIOAMSEL >> 16)
+	mov r0,#0x00		; använd inte analoga funktioner
+	str r0,[r1]
+
+	mov r1,#(GPIOE_GPIOPCTL & 0xffff)
+	movt r1,#(GPIOE_GPIOPCTL >> 16)
+	mov r0,#0x00		; använd inga specialfunktioner på port B	
+	str r0,[r1]
+
+	mov r1,#(GPIOE_GPIOPUR & 0xffff)
+	movt r1,#(GPIOE_GPIOPUR >> 16)
+	mov r0,#0x00		; ingen pullup på port B
+	str r0,[r1]
+
+	mov r1,#(GPIOE_GPIODEN & 0xffff)
+	movt r1,#(GPIOE_GPIODEN >> 16)
+	mov r0,#0xff		; alla pinnar är digital I/O
+	str r0,[r1]
+
+	bx lr
+
+
+;; Utskrift av ett tecken på serieport
+;; r0 innehåller tecken att skriva ut (1 byte)
+;; returnerar först när tecken skickats
+;; förstör r0, r1 och r2 
+printchar:
+	mov r1,#(UART0_UARTFR & 0xffff)	; peka på serieportens statusregister
+	movt r1,#(UART0_UARTFR >> 16)
+loop1:
+	ldr r2,[r1]			; hämta statusflaggor
+	ands r2,r2,#0x20		; kan ytterligare tecken skickas?
+	bne loop1			; nej, försök igen
+	mov r1,#(UART0_UARTDR & 0xffff)	; ja, peka på serieportens dataregister
+	movt r1,#(UART0_UARTDR >> 16)
+	str r0,[r1]			; skicka tecken
+	bx lr
+
+
+
+
