@@ -13,7 +13,8 @@ We used a private hardware that built on the microcontroller Texas Instruments T
 This lab was about setting a passcode for the hexadecimal keypad module.
 While the passcode was incorrect, the multi-color LED would flash red every second.
 If you input the correct passcode, the multi-color LED would shine green.
-To "lock" (make it blink red) the passcode while it was "unlocked" (shining green), you would click F on the keypad
+To "lock" (make it blink red) the passcode while it was "unlocked" (shining green), you would click F on the keypad.
+
 ![Keypad](keypad.png)
 
 ### Lab 2:
@@ -23,6 +24,8 @@ This lab was using a module with 8 on/off LEDs in a row. The objective was to cr
 ### Lab 3:
 This lab was about emulating a timer on a 4 digit seven segment display. Since only one of the 7 segment displays could be lit at once, we would change the currently lit display so fast that the human eye can not see it blinking, similar to how a normal lightbulb works. Once the timer reached 9999, it would restart from 0000.
 ![4 Digit Seven Segment Display](image-2.png)
+
+
 What the ports controll:
     - Port B - What segments if the currently selected segment would light up
     - Port F - Selects which one of the four segments is the current one. 
