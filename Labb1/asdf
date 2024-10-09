@@ -1,0 +1,43 @@
+mov r0, #(GUESS_ONE & 0xffff)
+	movt r0, #(GUESS_ONE >> 16)
+    ldrb r1, [r0]			; Läs in värdet på r0 och spara i r1
+
+    mov r0, #(CORRECT_ONE & 0xffff)
+	movt r0, #(CORRECT_ONE >> 16)
+    ldrb r2, [r0]			; Läs in värdet på r0 och spara i r2
+
+    cmp r1, r2				; Jämför gissning och korrekt 1:a siffra
+    bne code_not_equal		; Om de inte är lika, gå till code_not_equal
+
+    mov r0, #(GUESS_TWO & 0xffff)
+	movt r0, #(GUESS_TWO >> 16)
+    ldrb r1, [r0]
+
+    mov r0, #(CORRECT_TWO & 0xffff)
+	movt r0, #(CORRECT_TWO >> 16)
+    ldrb r2, [r0]
+
+    cmp r1, r2
+    bne code_not_equal
+
+    mov r0, #(GUESS_THREE & 0xffff)
+	movt r0, #(GUESS_THREE >> 16)
+    ldrb r1, [r0]
+
+    mov r0, #(CORRECT_THREE & 0xffff)
+	movt r0, #(CORRECT_THREE >> 16)
+    ldrb r2, [r0]
+
+    cmp r1, r2
+    bne code_not_equal
+
+    mov r0, #(GUESS_FOUR & 0xffff)
+	movt r0, #(GUESS_FOUR >> 16)
+    ldrb r1, [r0]
+
+    mov r0, #(CORRECT_FOUR & 0xffff)
+	movt r0, #(CORRECT_FOUR >> 16)
+    ldrb r2, [r0]
+
+    cmp r1, r2
+    bne code_not_equal

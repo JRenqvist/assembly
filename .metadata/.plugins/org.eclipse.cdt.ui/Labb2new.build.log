@@ -1,0 +1,21 @@
+
+**** Build of configuration Debug for project Labb2new ****
+
+/sw/ti/ccs/12.5.0/ccs/utils/bin/gmake -k -j 20 all -O 
+ 
+Building target: "Labb2new.out"
+Invoking: Arm Linker
+"/sw/ti/ccs/12.5.0/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me --define=ccs="ccs" --define=PART_TM4C123GH6PM -g --gcc --diag_warning=225 --diag_wrap=off --display_error_number --abi=eabi -z -m"Labb2new.map" --heap_size=0 --stack_size=512 -i"/sw/ti/ccs/12.5.0/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/lib" -i"/sw/ti/ccs/12.5.0/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="Labb2new_linkInfo.xml" --rom_model -o "Labb2new.out" "./labb2a.obj" "./labb2b.obj" "./tm4c123gh6pm_startup_ccs.obj" "../tm4c123gh6pm.cmd"  -llibc.a 
+<Linking>
+error #10056: symbol "main" redefined: first defined in "./labb2a.obj"; redefined in "./labb2b.obj"
+error #10056: symbol "intgpioe" redefined: first defined in "./labb2a.obj"; redefined in "./labb2b.obj"
+error #10056: symbol "intgpiod" redefined: first defined in "./labb2a.obj"; redefined in "./labb2b.obj"
+error #10010: errors encountered during linking; "Labb2new.out" not built
+ 
+>> Compilation failure
+makefile:135: recipe for target 'Labb2new.out' failed
+gmake[1]: *** [Labb2new.out] Error 1
+gmake: *** [all] Error 2
+makefile:131: recipe for target 'all' failed
+
+**** Build Finished ****
